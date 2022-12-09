@@ -240,11 +240,11 @@ def run(protocol: protocol_api.ProtocolContext):
         'asp_delay': 0.5,
         'drip_delay': 0.5,
         'disp_rate': 0.75,
-        'disp_delay': 0.5,
+        'disp_delay': 2,
         'blowout_rate': 75,
         'asp_with': 20,
         'asp_touch_tip': 0,
-        'blowout_cycles': 1
+        'blowout_cycles': 2
     }
 
     # %% Section 4: Prepare formulations
