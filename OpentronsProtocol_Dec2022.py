@@ -324,4 +324,5 @@ def run(protocol: protocol_api.ProtocolContext):
                                  T['asp_rate'], T['asp_delay'], T['drip_delay'],
                                  T['disp_rate'], T['disp_delay'], T['blowout_rate'],
                                  T['asp_touch_tip'], T['asp_with'], T['blowout_cycles'])
+                    protocol.delay(2) # 2 seconds delay between each thickener step
             p1000.drop_tip()
