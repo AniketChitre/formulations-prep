@@ -127,7 +127,7 @@ class PipettingInstructions:
         return instructions
         
 class MassProfile:
-    def __init__(self,filename,t_baseline,derivNoise=0,secDerivNoise=0):
+    def __init__(self,filename,t_baseline,derivNoise=0,secDerivNoise=0,minChange=0.01):
         massProfile = pd.read_csv(filename,encoding='utf-8-sig')
         self.time = massProfile['Time']
         self.raw = massProfile['Mass']
@@ -135,7 +135,7 @@ class MassProfile:
         self.idx_baseline = self.time[self.time<=t_baseline].max()
         self.derivNoise = derivNoise
         self.secDerivNoise = secDerivNoise
-
+        self.minChange = minChange
     
     def showProfiles(self):
         fig, ax1 = plt.subplots()
@@ -187,28 +187,35 @@ class MassProfile:
             d2dt_noise = self.secDerivNoise
         deriv_baseline=bl_mult*ddt_noise
         secderiv_baseline=bl_mult*d2dt_noise
+        print("Peak threshold for 1st derivative = " + str(deriv_baseline) + " g/s and for 2nd derivative = " + str(secderiv_baseline) + " g/s^2")
         running_idx=start_idx
         if show:
             self.showProfiles()
         for step in steps:
             if step.species.chemicalType==specType:
-                temp_idx = next(x for x, val in enumerate(self.dmdt) if abs(val)>deriv_baseline and x>running_idx)
-                temp_idx2 = next(x for x, val in enumerate(self.d2mdt) if abs(val)>secderiv_baseline and x>running_idx)
-                start_idx = min(temp_idx,temp_idx2) -1
-                running_idx=start_idx
-                criterion=False
-                running_idx=max(temp_idx,temp_idx2)
-                while not criterion:
-                    criterion = True
-                    for i in range(mergeSens-1):
-                        criterion = criterion and abs(self.dmdt[running_idx+i])<deriv_baseline
-                        criterion = criterion and abs(self.d2mdt[running_idx+i])<secderiv_baseline
-                    else:
-                        running_idx=running_idx+1
-                end_idx=running_idx
-                start_mass = np.median(self.mass[start_idx-2:start_idx])
-                end_mass = np.median(self.mass[end_idx:end_idx+2])
-                step.addedMass = end_mass-start_mass
+                addedMass = 0
+                while addedMass < self.minChange:
+                    temp_idx = next(x for x, val in enumerate(self.dmdt) if abs(val)>deriv_baseline and x>running_idx)
+                    temp_idx2 = next(x for x, val in enumerate(self.d2mdt) if abs(val)>secderiv_baseline and x>running_idx)
+                    start_idx = min(temp_idx,temp_idx2) -1
+                    running_idx=start_idx
+                    criterion=False
+                    running_idx=max(temp_idx,temp_idx2)
+                    while not criterion:
+                        criterion = True
+                        for i in range(mergeSens-1):
+                            criterion = criterion and abs(self.dmdt[running_idx+i])<deriv_baseline
+                            criterion = criterion and abs(self.d2mdt[running_idx+i])<secderiv_baseline
+                        else:
+                            running_idx=running_idx+1
+                    end_idx=running_idx
+                    start_mass = np.median(self.mass[start_idx-2:start_idx])
+                    end_mass = np.median(self.mass[end_idx:end_idx+2])
+                    addedMass = end_mass-start_mass
+                    if addedMass < self.minChange:
+                        print("Erroneously detected peak from " + str(self.time[start_idx]) + "s to " + str(self.time[end_idx]) + \
+                              "s - but detected mass change was smaller than defined minimum of " + str(self.minChange) + " g")
+                step.addedMass = addedMass
                 step.actualVol = step.sample.calcVolumeFrac(step.species,step.addedMass)
                 print("Addition of " + str(round(step.addedMass,3)) + "g " + step.species.name + " detected from " + \
                       str(self.time[start_idx]) + "s to " + str(self.time[end_idx]) + "s - " + \
