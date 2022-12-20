@@ -172,7 +172,7 @@ class MassProfile:
         #self.showProfiles()
         
     def analyseIngredients(self,avg_window,bl_mult,mergeSens,specType,steps,start_idx,show,thresh_mode=0):
-        #thresh_mode: 0 is delta t at beginning, 1 detla t at end, 2 is absolute values
+        #thresh_mode: 0 is delta t at beginning, 1 delta t at end
         self.smoothData(avg_window)
         self.ddt()
         self.d2dt()
@@ -182,11 +182,8 @@ class MassProfile:
         elif thresh_mode==1:
             ddt_noise = np.nanmax(abs(self.dmdt[-self.idx_baseline:]))
             d2dt_noise = np.nanmax(abs(self.d2mdt[-self.idx_baseline:]))
-        else:
-            ddt_noise = self.derivNoise
-            d2dt_noise = self.secDerivNoise
-        deriv_baseline=bl_mult*ddt_noise
-        secderiv_baseline=bl_mult*d2dt_noise
+        deriv_baseline=max(bl_mult*ddt_noise,self.derivNoise/avg_window)
+        secderiv_baseline=max(bl_mult*d2dt_noise,self.secDerivNoise/avg_window)
         print("Peak threshold for 1st derivative = " + str(deriv_baseline) + " g/s and for 2nd derivative = " + str(secderiv_baseline) + " g/s^2")
         running_idx=start_idx
         if show:
@@ -250,7 +247,7 @@ class MassProfile:
             
 
 # speciesList = PipettingSpecies.readCSV('SpeciesDictionary.csv')
-# instructions = PipettingInstructions.readCSV('DoE_csv/PhD_MasterDataset_OT_initial.csv', firstRow=36, lastRow=42)
+# instructions = PipettingInstructions.readCSV('DoE_csv/PhD_MasterDataset_OT_initial.csv', firstRow=18, lastRow=24)
 # targetVolume = 10
 # sampleList = PipettingSample.createSamples(instructions,targetVol=targetVolume)
 # maxVolume = 1
@@ -259,7 +256,7 @@ class MassProfile:
 #     sample.getVolFracSeries(speciesDictionary=speciesList)
 # steps = PipettingStep.createSteps(instructions=instructions,speciesDictionary=speciesList,sampleList=sampleList,maxVol=maxVolume)
 
-# massProfile = MassProfile('mass_data/MassProfile_191222_S37-42_run1.csv',t_baseline=25)
+# massProfile = MassProfile('mass_data/MassProfile_201222_S19-24_run2.csv',t_baseline=25,derivNoise=0.0005,secDerivNoise=0.0001)
 
 # (water_mass,t1)=massProfile.analyseWater(avg_window=10,bl_mult=3)
 # water=PipettingSpecies.getSpecies(speciesList, 'water')
