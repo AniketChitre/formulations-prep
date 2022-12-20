@@ -153,8 +153,8 @@ def run(protocol: protocol_api.ProtocolContext):
     Cosmetic_Jars_Raised_Balance = json.loads(COSMETIC_JARS_RAISED_BALANCE)
 
     # 2nd argument (#) corresponds to OT-2 slot position
-    ingredients_1 = protocol.load_labware_from_definition(AMDM_12_50ml_falcon_tube, 9)  # anionic + non-ionic surfactants
-    ingredients_2 = protocol.load_labware_from_definition(AMDM_12_50ml_falcon_tube, 5)  # amphoteric surfactants + water
+    ingredients_1 = protocol.load_labware_from_definition(AMDM_12_50ml_falcon_tube, 5)  # anionic + non-ionic surfactants
+    ingredients_2 = protocol.load_labware_from_definition(AMDM_12_50ml_falcon_tube, 9)  # amphoteric surfactants + water
     ingredients_3 = protocol.load_labware_from_definition(AMDM_12_50ml_falcon_tube, 8)  # amino-acid based + cationic surfactant + thickeners
     ingredients_4 = protocol.load_labware_from_definition(AMDM_12_50ml_falcon_tube, 6)  # conditioning polymers + water
 
@@ -196,8 +196,8 @@ def run(protocol: protocol_api.ProtocolContext):
     V_tot = 10000  # ~ require approx. 8-10 mL to submerge the pH probe sufficiently in the pH adjustment step
 
     # Edit these each run :)
-    start_sample_idx = 31
-    end_sample_idx = 36
+    start_sample_idx = 19
+    end_sample_idx = 24
 
     vol_dict = {i: list(round(V_tot*((DoE[i].iloc[start_sample_idx-1:end_sample_idx]*DoE['Sample Density'].iloc[start_sample_idx-1:end_sample_idx])/(100*density_dict[i])))) for i in ingredient_list}
 
