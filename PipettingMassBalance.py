@@ -81,7 +81,7 @@ class PipettingSample:
     def getTotalDensity(self,speciesDictionary):
         denom = 0
         num = 0
-        for (specName,massFrac) in self.massFracSeries.iteritems():
+        for (specName,massFrac) in self.massFracSeries.items():
             spec = PipettingSpecies.getSpecies(speciesDictionary, specName)
             denom = denom + massFrac / spec.density
             num = num + massFrac
@@ -94,7 +94,7 @@ class PipettingSample:
     def getVolFracSeries(self,speciesDictionary):
         self.volFracSeries = pd.Series(dtype='float64').reindex_like(self.massFracSeries)
         self.volFracSeries.values[:]=0.0
-        for (name,val) in self.volFracSeries.iteritems():
+        for (name,val) in self.volFracSeries.items():
             species = PipettingSpecies.getSpecies(speciesDictionary,name)
             self.volFracSeries[name] = self.calcVolumeFrac(species,self.massFracSeries[name]) # species.getVolume(mass=self.massFracSeries[name]) * self.totalDensity
         waterVolFrac = 1- self.volFracSeries.sum()
@@ -134,7 +134,7 @@ class MassProfile:
         self.time = massProfile['Time']
         self.raw = massProfile['Mass']
         self.mass = massProfile['Mass']
-        self.t_baseline = t_baseline
+        self.idx_baseline = self.time[self.time<=t_baseline].max()
         self.derivNoise = derivNoise
         self.secDerivNoise = secDerivNoise
 
@@ -158,12 +158,12 @@ class MassProfile:
         if window==1:
             self.mass = self.raw
         else:
-            self.mass=self.raw.rolling(window=window).mean()
+            self.mass=self.raw.rolling(window=window,min_periods=1).mean()
         
     def analyseWater(self,avg_window,bl_mult):
         self.smoothData(avg_window)
         self.ddt()
-        deriv_baseline=bl_mult*np.nanmax(abs(self.dmdt[0:self.t_baseline]))
+        deriv_baseline=bl_mult*np.nanmax(abs(self.dmdt[0:self.idx_baseline]))
         start_idx = next(x for x, val in enumerate(self.dmdt) if val>deriv_baseline) -1
         start_mass = np.median(self.mass[start_idx-2:start_idx])
         end_idx = next(x for x, val in enumerate(self.dmdt) if val<deriv_baseline and x> start_idx)
@@ -179,11 +179,11 @@ class MassProfile:
         self.ddt()
         self.d2dt()
         if thresh_mode==0:
-            ddt_noise = np.nanmax(abs(self.dmdt[0:self.t_baseline]))
-            d2dt_noise = np.nanmax(abs(self.d2mdt[0:self.t_baseline]))
+            ddt_noise = np.nanmax(abs(self.dmdt[0:self.idx_baseline]))
+            d2dt_noise = np.nanmax(abs(self.d2mdt[0:self.idx_baseline]))
         elif thresh_mode==1:
-            ddt_noise = np.nanmax(abs(self.dmdt[-self.t_baseline:]))
-            d2dt_noise = np.nanmax(abs(self.d2mdt[-self.t_baseline:]))
+            ddt_noise = np.nanmax(abs(self.dmdt[-self.idx_baseline:]))
+            d2dt_noise = np.nanmax(abs(self.d2mdt[-self.idx_baseline:]))
         else:
             ddt_noise = self.derivNoise
             d2dt_noise = self.secDerivNoise
@@ -267,7 +267,7 @@ for sample in sampleList:
 print("This equals a volume of " + str(round(water_volume_act,3)) + "m; expected was "\
       + str(round(water_volume_set,3)) + "mL; error is " + str(round(abs((water_volume_set-water_volume_act)/water_volume_set)*100,3)) + "%")
 
-t2 = massProfile.analyseIngredients(avg_window=5, bl_mult=5, mergeSens=5, specType='surfactant',steps=steps,start_idx=t1,show=True)   
+t2 = massProfile.analyseIngredients(avg_window=5, bl_mult=5, mergeSens=7, specType='surfactant',steps=steps,start_idx=t1,show=True)   
 t3 = massProfile.analyseIngredients(avg_window=7, bl_mult=6, mergeSens=5, specType='polyelectrolyte',steps=steps,start_idx=t2,show=True)
 t4 = massProfile.analyseIngredients(avg_window=1, bl_mult=7, mergeSens=2, specType='thickener',steps=steps,start_idx=t3,show=True)
 
@@ -278,6 +278,6 @@ actualMassFractions = pd.DataFrame(dtype='float64').reindex_like(instructions)
 actualMassFractions[:]=0
 for i in range(len(sampleList)):
     actualMassFractions['ID'].iloc[i] = sampleList[i].sampleId
-    for entry in sampleList[i].addedMassSeries.iteritems():
+    for entry in sampleList[i].addedMassSeries.items():
         actualMassFractions[entry[0]].iloc[i] = entry[1]/sampleList[i].actualMass*100
 # actualMassFractions.to_csv('results.csv', index=False)
