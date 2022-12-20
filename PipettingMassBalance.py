@@ -59,12 +59,10 @@ class PipettingStep:
                         val=val/100
                         sample = PipettingSample.getSample(sampleIds.iloc[i], sampleList)
                         volume = sample.calcVolumeFrac(species,val)*sample.targetVolume #species.getVolume(val)*sample.totalDensity*targetVolume
-                        if volume>maxVol:
-                            step = PipettingStep(species, volume/2, sample)
-                            stepList.append(step)
-                            stepList.append(step)
-                        else:
-                            step = PipettingStep(species, volume, sample)
+                        nr_steps = int(np.ceil(volume/maxVol))
+                        
+                        for j in range(1,nr_steps+1):
+                            step = PipettingStep(species, volume/nr_steps, sample)
                             stepList.append(step)
                     i=i+1
         return stepList
@@ -244,40 +242,40 @@ class MassProfile:
                 self.d2mdt[i] = (self.dmdt[i+1]-self.dmdt[i-1]) / (self.time[i+1]-self.time[i-1])
             
 
-speciesList = PipettingSpecies.readCSV('SpeciesDictionary.csv')
-instructions = PipettingInstructions.readCSV('DoE_csv/PhD_MasterDataset_OT_initial.csv', firstRow=36, lastRow=42)
-targetVolume = 10
-sampleList = PipettingSample.createSamples(instructions,targetVol=targetVolume)
-maxVolume = 1
-for sample in sampleList:
-    sample.getTotalDensity(speciesDictionary=speciesList)
-    sample.getVolFracSeries(speciesDictionary=speciesList)
-steps = PipettingStep.createSteps(instructions=instructions,speciesDictionary=speciesList,sampleList=sampleList,maxVol=maxVolume)
+# speciesList = PipettingSpecies.readCSV('SpeciesDictionary.csv')
+# instructions = PipettingInstructions.readCSV('DoE_csv/PhD_MasterDataset_OT_initial.csv', firstRow=36, lastRow=42)
+# targetVolume = 10
+# sampleList = PipettingSample.createSamples(instructions,targetVol=targetVolume)
+# maxVolume = 1
+# for sample in sampleList:
+#     sample.getTotalDensity(speciesDictionary=speciesList)
+#     sample.getVolFracSeries(speciesDictionary=speciesList)
+# steps = PipettingStep.createSteps(instructions=instructions,speciesDictionary=speciesList,sampleList=sampleList,maxVol=maxVolume)
 
-massProfile = MassProfile('mass_data/MassProfile_191222_S37-42_run1.csv',t_baseline=25)
+# massProfile = MassProfile('mass_data/MassProfile_191222_S37-42_run1.csv',t_baseline=25)
 
-(water_mass,t1)=massProfile.analyseWater(avg_window=10,bl_mult=3)
-water=PipettingSpecies.getSpecies(speciesList, 'water')
-water_volume_act=water.getVolume(water_mass)
-water_volume_set=0
-for sample in sampleList:
-    water_volume = sample.waterVol
-    water_volume_set = water_volume_set + water_volume
-    sample.actualMass = water_volume/water.density
-print("This equals a volume of " + str(round(water_volume_act,3)) + "m; expected was "\
-      + str(round(water_volume_set,3)) + "mL; error is " + str(round(abs((water_volume_set-water_volume_act)/water_volume_set)*100,3)) + "%")
+# (water_mass,t1)=massProfile.analyseWater(avg_window=10,bl_mult=3)
+# water=PipettingSpecies.getSpecies(speciesList, 'water')
+# water_volume_act=water.getVolume(water_mass)
+# water_volume_set=0
+# for sample in sampleList:
+#     water_volume = sample.waterVol
+#     water_volume_set = water_volume_set + water_volume
+#     sample.actualMass = water_volume/water.density
+# print("This equals a volume of " + str(round(water_volume_act,3)) + "m; expected was "\
+#       + str(round(water_volume_set,3)) + "mL; error is " + str(round(abs((water_volume_set-water_volume_act)/water_volume_set)*100,3)) + "%")
 
-t2 = massProfile.analyseIngredients(avg_window=5, bl_mult=5, mergeSens=7, specType='surfactant',steps=steps,start_idx=t1,show=True)   
-t3 = massProfile.analyseIngredients(avg_window=7, bl_mult=6, mergeSens=5, specType='polyelectrolyte',steps=steps,start_idx=t2,show=True)
-t4 = massProfile.analyseIngredients(avg_window=1, bl_mult=7, mergeSens=2, specType='thickener',steps=steps,start_idx=t3,show=True)
+# t2 = massProfile.analyseIngredients(avg_window=5, bl_mult=5, mergeSens=7, specType='surfactant',steps=steps,start_idx=t1,show=True)   
+# t3 = massProfile.analyseIngredients(avg_window=7, bl_mult=6, mergeSens=5, specType='polyelectrolyte',steps=steps,start_idx=t2,show=True)
+# t4 = massProfile.analyseIngredients(avg_window=1, bl_mult=7, mergeSens=2, specType='thickener',steps=steps,start_idx=t3,show=True)
 
-for step in steps:
-    step.addToSample()
+# for step in steps:
+#     step.addToSample()
 
-actualMassFractions = pd.DataFrame(dtype='float64').reindex_like(instructions)
-actualMassFractions[:]=0
-for i in range(len(sampleList)):
-    actualMassFractions['ID'].iloc[i] = sampleList[i].sampleId
-    for entry in sampleList[i].addedMassSeries.items():
-        actualMassFractions[entry[0]].iloc[i] = entry[1]/sampleList[i].actualMass*100
+# actualMassFractions = pd.DataFrame(dtype='float64').reindex_like(instructions)
+# actualMassFractions[:]=0
+# for i in range(len(sampleList)):
+#     actualMassFractions['ID'].iloc[i] = sampleList[i].sampleId
+#     for entry in sampleList[i].addedMassSeries.items():
+#         actualMassFractions[entry[0]].iloc[i] = entry[1]/sampleList[i].actualMass*100
 # actualMassFractions.to_csv('results.csv', index=False)
