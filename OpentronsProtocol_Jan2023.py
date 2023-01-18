@@ -4,7 +4,7 @@
 Pipetting procedure to prepare shampoo formulations in 15g cosmetic jars.
 Follow the `loc_dict` for placing the ingredients in the correct positions.
 
-Start with the ingredient falcon tubes approx. 20 mL full and the water tubes filled till 35 mL.
+Start with the ingredient falcon tubes approx. 25 mL full and the water tubes filled till 35 mL.
 
 Last Updated: 08.12.22
 
@@ -263,12 +263,12 @@ def run(protocol: protocol_api.ProtocolContext):
 
     #Place 2 tubes of water in positions ingredients_2['B4'] (slot #1) and ingredients_4['B4'] (slot #6)
 
-    p1000.pick_up_tip()
+    p1000.pick_up_tip() 
     for i in range(6):
         if i < 3:
             p1000.transfer(water_vol[i], ingredients_2['B4'], dest_list[i], new_tip='never')
         elif i < 6:
-            p1000.transfer(water_vol[i], ingredients_4['B4'], dest_list[i], new_tip='never')
+           p1000.transfer(water_vol[i], ingredients_4['B4'], dest_list[i], new_tip='never')
     p1000.drop_tip()
 
     # =================================================================================
