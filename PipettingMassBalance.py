@@ -200,7 +200,7 @@ class MassProfile:
                     running_idx=max(temp_idx,temp_idx2)
                     while not criterion:
                         criterion = True
-                        for i in range(mergeSens-1):
+                        for i in range(mergeSens):
                             criterion = criterion and abs(self.dmdt[running_idx+i])<deriv_baseline
                             criterion = criterion and abs(self.d2mdt[running_idx+i])<secderiv_baseline
                         else:
