@@ -189,7 +189,7 @@ def run(protocol: protocol_api.ProtocolContext):
 
     # %% Section 3: DoE and formulation ingredients liquid handling parameters
 
-    DoE = pd.read_csv(r'/var/lib/jupyter/notebooks/MasterDataset_OT_DoE_March2023.csv', index_col=0)
+    DoE = pd.read_csv(r'/var/lib/jupyter/notebooks/SuggestedExperiments/MasterDataset_OT_DoE_06-7-03-23.csv', index_col=0)
     DoE = DoE.loc[:, ~DoE.columns.str.contains('^Unnamed')]  # drop any unnamed columns resulting from formatting issues when saving .xlsx to .csv
 
     # Excel workbook contains mass_fraction, but need to convert this to a volume for the Opentrons to dispense
