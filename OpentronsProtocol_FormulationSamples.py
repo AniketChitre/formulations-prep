@@ -196,8 +196,8 @@ def run(protocol: protocol_api.ProtocolContext):
     V_tot = 10000  # ~ require approx. 8-10 mL to submerge the pH probe sufficiently in the pH adjustment step
 
     # Edit these each run :)
-    start_sample_idx = 127
-    end_sample_idx = 132
+    start_sample_idx = 133
+    end_sample_idx = 138
 
     vol_dict = {i: list(round(V_tot*((DoE[i].iloc[start_sample_idx-1:end_sample_idx]*DoE['Sample Density'].iloc[start_sample_idx-1:end_sample_idx])/(100*density_dict[i])))) for i in ingredient_list}
 
@@ -324,5 +324,5 @@ def run(protocol: protocol_api.ProtocolContext):
                                  T['asp_rate'], T['asp_delay'], T['drip_delay'],
                                  T['disp_rate'], T['disp_delay'], T['blowout_rate'],
                                  T['asp_touch_tip'], T['asp_with'], T['blowout_cycles'])
-                    protocol.delay(2) # 2 seconds delay between each thickener step
+                    protocol.delay(4) # 4 seconds delay between each thickener step
             p1000.drop_tip()
