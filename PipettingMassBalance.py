@@ -226,6 +226,26 @@ class MassProfile:
                     
         return running_idx
         
+    def defineIngredientsManually(self,specType,steps,show,manualTimes):
+        self.smoothData(1)
+        self.ddt()
+        self.d2dt()
+        if show:
+            self.showProfiles()
+        step_nr = 0
+        for step in steps:
+            if step.species.chemicalType==specType:
+                start_idx = next(x for x, val in enumerate(self.time) if val>=manualTimes[step_nr])
+                end_idx = next(x for x, val in enumerate(self.time) if val>=manualTimes[step_nr+1])
+                step.addedMass = self.mass[end_idx]-self.mass[start_idx]
+                step.actualVol = step.sample.calcVolumeFrac(step.species,step.addedMass)
+                print("Addition of " + str(round(step.addedMass,3)) + "g " + step.species.name + " detected from " + \
+                      str(self.time[start_idx]) + "s to " + str(self.time[end_idx]) + "s - " + \
+                          "expected volume = " + str(round(step.targetVol,3)) + "mL and actual volume = " + \
+                              str(round(step.actualVol,3)) + "mL (resulting error is " + str(round(abs(1-step.actualVol/step.targetVol)*100,3)) + "%)")
+                step_nr = step_nr + 1
+        return end_idx
+        
         
     def ddt(self):
         self.dmdt = pd.Series(dtype='float64').reindex_like(self.mass)
