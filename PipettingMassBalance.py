@@ -158,10 +158,15 @@ class MassProfile:
         else:
             self.mass=self.raw.rolling(window=window,min_periods=1).mean()
         
-    def analyseWater(self,avg_window,bl_mult):
+    def analyseWater(self,avg_window,bl_mult,thresh_mode=0):
+        #thresh_mode: 0 is delta t at beginning, 1 delta t at end
         self.smoothData(avg_window)
         self.ddt()
-        deriv_baseline=bl_mult*np.nanmax(abs(self.dmdt[0:self.idx_baseline]))
+        if thresh_mode==0:
+            ddt_noise = np.nanmax(abs(self.dmdt[0:self.idx_baseline]))
+        elif thresh_mode==1:
+            ddt_noise = np.nanmax(abs(self.dmdt[-self.idx_baseline:]))
+        deriv_baseline=max(bl_mult*ddt_noise,self.derivNoise/avg_window)
         start_idx = next(x for x, val in enumerate(self.dmdt) if val>deriv_baseline) -1
         start_mass = np.median(self.mass[start_idx-2:start_idx])
         end_idx = next(x for x, val in enumerate(self.dmdt) if val<deriv_baseline and x> start_idx)
