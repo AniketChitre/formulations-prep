@@ -158,15 +158,10 @@ class MassProfile:
         else:
             self.mass=self.raw.rolling(window=window,min_periods=1).mean()
         
-    def analyseWater(self,avg_window,bl_mult,thresh_mode=0):
-        #thresh_mode: 0 is delta t at beginning, 1 delta t at end
+    def analyseWater(self,avg_window,bl_mult):
         self.smoothData(avg_window)
         self.ddt()
-        if thresh_mode==0:
-            ddt_noise = np.nanmax(abs(self.dmdt[0:self.idx_baseline]))
-        elif thresh_mode==1:
-            ddt_noise = np.nanmax(abs(self.dmdt[-self.idx_baseline:]))
-        deriv_baseline=max(bl_mult*ddt_noise,self.derivNoise/avg_window)
+        deriv_baseline=bl_mult*np.nanmax(abs(self.dmdt[0:self.idx_baseline]))
         start_idx = next(x for x, val in enumerate(self.dmdt) if val>deriv_baseline) -1
         start_mass = np.median(self.mass[start_idx-2:start_idx])
         end_idx = next(x for x, val in enumerate(self.dmdt) if val<deriv_baseline and x> start_idx)
@@ -225,26 +220,6 @@ class MassProfile:
                               str(round(step.actualVol,3)) + "mL (resulting error is " + str(round(abs(1-step.actualVol/step.targetVol)*100,3)) + "%)")
                     
         return running_idx
-        
-    def defineIngredientsManually(self,specType,steps,show,manualTimes):
-        self.smoothData(1)
-        self.ddt()
-        self.d2dt()
-        if show:
-            self.showProfiles()
-        step_nr = 0
-        for step in steps:
-            if step.species.chemicalType==specType:
-                start_idx = next(x for x, val in enumerate(self.time) if val>=manualTimes[step_nr])
-                end_idx = next(x for x, val in enumerate(self.time) if val>=manualTimes[step_nr+1])
-                step.addedMass = self.mass[end_idx]-self.mass[start_idx]
-                step.actualVol = step.sample.calcVolumeFrac(step.species,step.addedMass)
-                print("Addition of " + str(round(step.addedMass,3)) + "g " + step.species.name + " detected from " + \
-                      str(self.time[start_idx]) + "s to " + str(self.time[end_idx]) + "s - " + \
-                          "expected volume = " + str(round(step.targetVol,3)) + "mL and actual volume = " + \
-                              str(round(step.actualVol,3)) + "mL (resulting error is " + str(round(abs(1-step.actualVol/step.targetVol)*100,3)) + "%)")
-                step_nr = step_nr + 1
-        return end_idx
         
         
     def ddt(self):
