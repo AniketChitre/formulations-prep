@@ -189,15 +189,15 @@ def run(protocol: protocol_api.ProtocolContext):
 
     # %% Section 3: DoE and formulation ingredients liquid handling parameters
 
-    DoE = pd.read_csv(r'/var/lib/jupyter/notebooks/SuggestedExperiments/MasterDataset_OT_DoE_10-18-05-23.csv', index_col=0)
+    DoE = pd.read_csv(r'/var/lib/jupyter/notebooks/SuggestedExperiments/MasterDataset_OT_DoE_16-05-23.csv', index_col=0)
     DoE = DoE.loc[:, ~DoE.columns.str.contains('^Unnamed')]  # drop any unnamed columns resulting from formatting issues when saving .xlsx to .csv
 
     # Excel workbook contains mass_fraction, but need to convert this to a volume for the Opentrons to dispense
     V_tot = 10000  # ~ require approx. 8-10 mL to submerge the pH probe sufficiently in the pH adjustment step
 
     # Edit these each run :)
-    start_sample_idx = 445
-    end_sample_idx = 450
+    start_sample_idx = 463
+    end_sample_idx = 468
 
     vol_dict = {i: list(round(V_tot*((DoE[i].iloc[start_sample_idx-1:end_sample_idx]*DoE['Sample Density'].iloc[start_sample_idx-1:end_sample_idx])/(100*density_dict[i])))) for i in ingredient_list}
 
