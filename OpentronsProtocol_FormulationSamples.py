@@ -196,8 +196,8 @@ def run(protocol: protocol_api.ProtocolContext):
     V_tot = 10000  # ~ require approx. 8-10 mL to submerge the pH probe sufficiently in the pH adjustment step
 
     # Edit these each run :)
-    start_sample_idx = 529
-    end_sample_idx = 534
+    start_sample_idx = 541
+    end_sample_idx = 546
 
     vol_dict = {i: list(round(V_tot*((DoE[i].iloc[start_sample_idx-1:end_sample_idx]*DoE['Sample Density'].iloc[start_sample_idx-1:end_sample_idx])/(100*density_dict[i])))) for i in ingredient_list}
 
