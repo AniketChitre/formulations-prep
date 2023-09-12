@@ -1,8 +1,6 @@
-# Prepare Liquid Formulations
-Protocols and codes to prepare and analyse the composition of the formulations
+# Liquid Formulations Prepartion
+Protocols and codes to prepare and analyse the composition of the formulations. 
 
-The Opentrons-2, automated pipetting robot, is being used to prepare the liquid formulations from the set of selected (viscous) industrial ingredients. 
+The Opentrons OT-2, automated pipetting robot, is used to prepare the liquid formulations from a set of selected (viscous) industrial ingredients. The `OpentronsProtocol_FormulationSamples.py` is uploaded to the OT-2 to run the designed protocol for automated viscous liquids handling. The file needs to be edited to select which formulations to prepare.
 
-The `OpentronsProtocol` is the main file which needs to be uploaded to the Opentrons robot, which will read in the instructions of which formulations to make from the specified csv file stored in the `DoE_csv` directory. The design of experiments are selected through the code in the `DoE_Generator` jupyter notebook. 
-
-During a run the lab laptop needs to be connected to the mass balance integrated under the OT-2 in our lab and the `OT-2_BalanceAutomation` file needs to be run, which will record the mass data from the balance. This outputs a csv to the `mass_data` directory, which will then be read in, along with the instructions and `SpeciesDictionary` to `balance_analysis` code. This runs a set of actions defined in `PipettingMassBalance` to deconvolute the mass vs. time profile into the mass of each ingredient added into each sample, ultimately, presenting the formulaton as it actual composition in mass %. 
+As discussed in our Opentrons application note (link to be added), a mass balance is run concurrently to log data during the Opentrons run with the `OT-2_BalanceAutomation.ipynb` Jupyter Notebook and the resulting data can be deconvoluted into the formulation compositions with `balance_analysis.ipynb`.
